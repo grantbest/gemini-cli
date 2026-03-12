@@ -128,7 +128,7 @@ export default function Dashboard() {
         {/* Header */}
         <header className="flex justify-between items-center border-b border-slate-800 pb-6">
           <div className="flex flex-col">
-            <h1 className="text-3xl font-bold tracking-tight">MLB Betting Engine</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Do Something Inc. | Betting Engine</h1>
             <p className="text-slate-400 mt-1">Real-time management & analytics dashboard.</p>
           </div>
           <div className="flex items-center gap-4">

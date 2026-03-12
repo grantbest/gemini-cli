@@ -9,13 +9,13 @@ export async function POST() {
 
   const embed = {
     title: "🧪 Test Alert",
-    description: "This is a test alert from the MLB Betting Engine management dashboard.",
+    description: "This is a test alert from the Do Something Inc. management dashboard.",
     color: 3447003,
     fields: [
       { name: "Status", value: "Functional", inline: true },
       { name: "Environment", value: "Production/Live", inline: true }
     ],
-    footer: { text: "MLB Betting Engine" }
+    footer: { text: "Do Something Inc." }
   };
 
   try {

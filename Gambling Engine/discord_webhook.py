@@ -42,7 +42,7 @@ class DiscordWebhookAlert:
                 }
             ],
             "footer": {
-                "text": "MLB Betting Engine | Please Bet Responsibly"
+                "text": "Do Something Inc. | Please Bet Responsibly"
             }
         }
 

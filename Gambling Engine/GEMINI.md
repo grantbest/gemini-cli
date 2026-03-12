@@ -1,4 +1,4 @@
-# Project Overview
+# Do Something Inc. | MLB Betting Engine
 
 This project is a Python-based analytics and betting engine for Major League Baseball (MLB) games. It identifies high-probability betting opportunities in real-time based on a set of predefined statistical models and sends alerts via Discord.
 
