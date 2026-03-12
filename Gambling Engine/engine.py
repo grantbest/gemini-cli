@@ -191,15 +191,15 @@ def get_active_rules():
     finally:
         if conn: conn.close()
 
-def log_bet(game_id, system, odds, stake, ai_insight=None):
+def log_bet(game_id, system, odds, stake, ai_insight=None, game_info=None):
     """Saves a triggered betting opportunity to the database for tracking."""
     conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute(
-            "INSERT INTO bet_tracking (game_id, system_triggered, odds_taken, stake, ai_insight) VALUES (%s, %s, %s, %s, %s)",
-            (game_id, system, odds, stake, ai_insight)
+            "INSERT INTO bet_tracking (game_id, system_triggered, odds_taken, stake, ai_insight, game_info) VALUES (%s, %s, %s, %s, %s, %s)",
+            (game_id, system, odds, stake, ai_insight, game_info)
         )
         conn.commit()
         cur.close()
@@ -286,7 +286,7 @@ def monitor_games(alerter, redis_client, ai_agent=None):
                     if rule['status'] == 'ACTIVE' and alerter:
                         alerter.send_alert(rule['name'], game_id, "Dynamic Rule Trigger", odds, stake, ai_insight)
                     
-                    log_bet(game_id, rule['name'], odds, stake, ai_insight)
+                    log_bet(game_id, rule['name'], odds, stake, ai_insight, game_info)
                     redis_client.setex(alert_key, 86400, "1")
 
         except Exception as e:

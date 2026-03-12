@@ -31,6 +31,7 @@ import {
 interface Bet {
   bet_id: number;
   game_id: number;
+  game_info?: string;
   system_triggered: string;
   odds_taken: number;
   stake: number;
@@ -247,11 +248,11 @@ export default function Dashboard() {
                   <table className="w-full text-left">
                     <thead className="text-xs uppercase text-slate-500 bg-slate-950/50">
                       <tr>
-                        <th className="px-6 py-4">Game ID</th>
+                        <th className="px-6 py-4">Game</th>
                         <th className="px-6 py-4">System</th>
                         <th className="px-6 py-4">Stake</th>
                         <th className="px-6 py-4">Status</th>
-                        <th className="px-6 py-4">AI Insight</th>
+                        <th className="px-6 py-4 text-center">AI</th>
                         <th className="px-6 py-4">Actions</th>
                       </tr>
                     </thead>
@@ -263,17 +264,17 @@ export default function Dashboard() {
                       ) : (
                         bets.map((bet) => (
                           <tr key={bet.bet_id} className="hover:bg-slate-800/30 transition-colors group">
-                            <td className="px-6 py-4 font-mono text-blue-400">#{bet.game_id}</td>
+                            <td className="px-6 py-4 text-xs font-bold text-slate-300">{bet.game_info || `ID: ${bet.game_id}`}</td>
                             <td className="px-6 py-4 text-sm font-medium">{bet.system_triggered}</td>
                             <td className="px-6 py-4 text-sm">{(bet.stake * 100).toFixed(1)}%</td>
                             <td className="px-6 py-4">
                               <StatusBadge status={bet.result} />
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-4 text-center">
                               {bet.ai_insight ? (
-                                <div className="relative group/insight">
-                                  <BrainCircuit size={18} className="text-indigo-400 cursor-help" />
-                                  <div className="absolute left-0 bottom-full mb-2 w-64 p-3 bg-slate-900 border border-slate-700 rounded-lg shadow-xl opacity-0 group-hover/insight:opacity-100 transition-opacity pointer-events-none z-50 text-[10px] leading-relaxed text-slate-300 italic">
+                                <div className="relative group/insight inline-block">
+                                  <BrainCircuit size={18} className="text-indigo-400 cursor-help mx-auto" />
+                                  <div className="absolute right-0 bottom-full mb-2 w-64 p-3 bg-slate-900 border border-slate-700 rounded-lg shadow-xl opacity-0 group-hover/insight:opacity-100 transition-opacity pointer-events-none z-50 text-[10px] leading-relaxed text-slate-300 italic text-left">
                                     {bet.ai_insight}
                                   </div>
                                 </div>
@@ -306,8 +307,8 @@ export default function Dashboard() {
                     <div key={bet.bet_id} className="p-4 space-y-3">
                       <div className="flex justify-between items-start">
                         <div>
-                          <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Game ID</p>
-                          <p className="font-mono text-blue-400">#{bet.game_id}</p>
+                          <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Game</p>
+                          <p className="text-xs font-bold text-slate-200">{bet.game_info || `ID: ${bet.game_id}`}</p>
                         </div>
                         <StatusBadge status={bet.result} />
                       </div>

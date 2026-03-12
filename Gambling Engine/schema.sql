@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS inning_logs (
 CREATE TABLE IF NOT EXISTS bet_tracking (
     bet_id SERIAL PRIMARY KEY,
     game_id INT,
+    game_info VARCHAR(100),
     system_triggered VARCHAR(50),
     odds_taken INT,
     stake DECIMAL,
