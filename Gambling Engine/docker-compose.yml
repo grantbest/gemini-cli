@@ -1,67 +1,56 @@
 services:
   db:
     image: postgres:15-alpine
-    container_name: mlb_betting_db
+    container_name: mlb_db_local
     environment:
-      POSTGRES_USER: ${DB_USER:-admin}
-      POSTGRES_PASSWORD: ${DB_PASS:-password123}
-      POSTGRES_DB: ${DB_NAME:-mlb_engine}
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: mlb_engine_local
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_local:/var/lib/postgresql/data
 
   redis:
     image: redis:7-alpine
-    container_name: mlb_message_bus
+    container_name: mlb_redis_local
     ports:
       - "6379:6379"
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: mlb_db_viewer
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+  mock_api:
+    build: ./scripts/mock_api
+    container_name: mlb_mock_api
     ports:
-      - "5050:80"
+      - "5001:5000"
 
   engine:
-    image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME_PREFIX:-grantbest/gambling-engine}/engine:${IMAGE_TAG:-latest}
     build: .
-    container_name: mlb_engine
+    container_name: mlb_engine_local
     environment:
-      PYTHONUNBUFFERED: 1
       DB_HOST: db
-      DB_NAME: ${DB_NAME:-mlb_engine}
-      DB_USER: ${DB_USER:-admin}
-      DB_PASS: ${DB_PASS:-password123}
+      DB_NAME: mlb_engine_local
+      DB_USER: admin
+      DB_PASS: password123
       REDIS_HOST: redis
-      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
-      KELLY_FRACTION: ${KELLY_FRACTION:-0.25}
-      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3}
+      MLB_API_BASE_URL: http://mock_api:5000/api/v1
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
     depends_on:
       - db
       - redis
+      - mock_api
 
   frontend:
-    image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME_PREFIX:-grantbest/gambling-engine}/frontend:${IMAGE_TAG:-latest}
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: mlb_frontend
+    container_name: mlb_frontend_local
     environment:
-      DATABASE_URL: postgresql://${DB_USER:-admin}:${DB_PASS:-password123}@db:5432/${DB_NAME:-mlb_engine}
-      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
-      APP_ENV: ${APP_ENV:-development}
-      DEV_URL: ${DEV_URL:-http://localhost:3000}
-      PROD_URL: ${PROD_URL:-http://localhost:3001}
-      DISCORD_CHANNEL_URL: ${DISCORD_CHANNEL_URL:-https://discord.com/channels/your-channel-id}
+      DATABASE_URL: postgresql://admin:password123@db:5432/mlb_engine_local
+      APP_ENV: development
     ports:
       - "3000:3000"
     depends_on:
       - db
 
 volumes:
-  postgres_data:
+  postgres_data_local:
