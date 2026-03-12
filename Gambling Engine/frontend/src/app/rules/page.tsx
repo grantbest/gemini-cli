@@ -44,9 +44,30 @@ const OPERATORS = [
 
 const DEFAULT_GROUP: RuleGroup = { logic: 'AND', conditions: [{ attribute: 'inning', operator: '>=', value: 7 }] };
 
+interface AppConfig {
+  appEnv: string;
+  devUrl: string;
+  prodUrl: string;
+  discordChannelUrl: string;
+}
+
 export default function RulesEngine() {
   const [rules, setRules] = useState<BettingRule[]>([]);
   const [editingRule, setEditingRule] = useState<BettingRule | null>(null);
+  const [config, setConfig] = useState<AppConfig | null>(null);
+
+  const fetchInitialData = async () => {
+    try {
+      const [rulesRes, configRes] = await Promise.all([
+        fetch('/api/rules'),
+        fetch('/api/config')
+      ]);
+      setRules(await rulesRes.json());
+      setConfig(await configRes.json());
+    } catch (err) {
+      console.error('Failed to fetch data', err);
+    }
+  };
 
   const fetchRules = async () => {
     const res = await fetch('/api/rules');
@@ -55,8 +76,10 @@ export default function RulesEngine() {
   };
 
   useEffect(() => {
-    fetchRules();
+    fetchInitialData();
   }, []);
+
+  if (!config) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500">Loading Configuration...</div>;
 
   const saveRule = async () => {
     if (!editingRule) return;
@@ -78,6 +101,10 @@ export default function RulesEngine() {
     fetchRules();
   };
 
+  const currentEnv = config?.appEnv || 'development';
+  const isProd = currentEnv === 'production';
+  const switchUrl = isProd ? config?.devUrl : config?.prodUrl;
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 p-6 font-sans">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -89,9 +116,22 @@ export default function RulesEngine() {
               <Link href="/" className="hover:underline text-sm flex items-center"><Server size={14} className="mr-1"/> Dashboard</Link>
               <ChevronRight size={14} className="text-slate-600"/>
               <span className="text-sm text-slate-300">Rules Engine</span>
+              <span className={`ml-2 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest border ${
+                isProd ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+              }`}>
+                {currentEnv}
+              </span>
             </div>
             <h1 className="text-3xl font-bold tracking-tight">Betting Rules Engine</h1>
-            <p className="text-slate-400 mt-1">Design and test logical triggers for the MLB engine.</p>
+            <div className="flex items-center gap-4 mt-1">
+              <p className="text-slate-400">Design and test logical triggers for the MLB engine.</p>
+              <a 
+                href={switchUrl}
+                className="text-[10px] text-slate-500 hover:text-blue-400 transition-colors flex items-center gap-1 border border-slate-800 px-2 py-1 rounded-md hover:border-blue-500/30"
+              >
+                <Activity size={10} /> Switch to {isProd ? 'Dev' : 'Production'}
+              </a>
+            </div>
           </div>
           <button 
             onClick={() => setEditingRule({ name: 'New Rule', description: '', status: 'DRY_RUN', conditions_json: DEFAULT_GROUP, action_type: 'DISCORD_ALERT', action_config: { odds: -110, p: 0.55 } })}
