@@ -58,3 +58,26 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+    
+    steps:
+      - name: Remote Deployment Trigger
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ github.ref == 'refs/heads/main' && secrets.PROD_SSH_HOST || secrets.DEV_SSH_HOST }}
+          username: ${{ github.ref == 'refs/heads/main' && secrets.PROD_SSH_USER || secrets.DEV_SSH_USER }}
+          key: ${{ github.ref == 'refs/heads/main' && secrets.PROD_SSH_KEY || secrets.DEV_SSH_KEY }}
+          script: |
+            # Navigate to the HOME LAB path, not the app path
+            cd ~/homelab/apps/betting-engine
+            
+            # Pull the new image we just built
+            docker compose pull
+            
+            # Restart the service with the new image
+            docker compose up -d
+
