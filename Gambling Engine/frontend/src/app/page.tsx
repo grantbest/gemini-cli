@@ -121,6 +121,12 @@ export default function Dashboard() {
     { name: 'Big Inning Momentum', wins: bets.filter(b => b.system_triggered === 'Big Inning Momentum' && b.result === 'WON').length },
   ];
 
+  const currentEnv = process.env.NEXT_PUBLIC_APP_ENV || 'development';
+  const isProd = currentEnv === 'production';
+  const switchUrl = isProd 
+    ? (process.env.NEXT_PUBLIC_DEV_URL || 'http://localhost:3000') 
+    : (process.env.NEXT_PUBLIC_PROD_URL || 'https://prod.dosomething.inc');
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 p-6 font-sans">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -128,10 +134,23 @@ export default function Dashboard() {
         {/* Header */}
         <header className="flex justify-between items-center border-b border-slate-800 pb-6">
           <div className="flex flex-col">
-            <h1 className="text-3xl font-bold tracking-tight">Do Something Inc. | Betting Engine</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold tracking-tight">Do Something Inc. | Betting Engine</h1>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest border ${
+                isProd ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+              }`}>
+                {currentEnv}
+              </span>
+            </div>
             <p className="text-slate-400 mt-1">Real-time management & analytics dashboard.</p>
           </div>
           <div className="flex items-center gap-4">
+            <a 
+              href={switchUrl}
+              className="text-xs text-slate-500 hover:text-blue-400 transition-colors flex items-center gap-1 border border-slate-800 px-3 py-2 rounded-lg hover:border-blue-500/30"
+            >
+              <Activity size={12} /> Switch to {isProd ? 'Dev' : 'Production'}
+            </a>
             <Link 
               href="/rules"
               className="bg-blue-600/10 border border-blue-500/20 hover:bg-blue-600/20 text-blue-400 px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2"

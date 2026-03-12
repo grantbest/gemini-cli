@@ -6,6 +6,8 @@ services:
 
   frontend:
     restart: always
+    environment:
+      - APP_ENV=production
     labels:
       - "environment=production"
 
