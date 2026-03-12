@@ -1,0 +1,58 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: mlb_betting_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASS:-password123}
+      POSTGRES_DB: ${DB_NAME:-mlb_engine}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: mlb_message_bus
+    ports:
+      - "6379:6379"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: mlb_db_viewer
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+
+  engine:
+    build: .
+    container_name: mlb_engine
+    environment:
+      DB_HOST: db
+      DB_NAME: ${DB_NAME:-mlb_engine}
+      DB_USER: ${DB_USER:-admin}
+      DB_PASS: ${DB_PASS:-password123}
+      REDIS_HOST: redis
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+      KELLY_FRACTION: ${KELLY_FRACTION:-0.25}
+    depends_on:
+      - db
+      - redis
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mlb_frontend
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-admin}:${DB_PASS:-password123}@db:5432/${DB_NAME:-mlb_engine}
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

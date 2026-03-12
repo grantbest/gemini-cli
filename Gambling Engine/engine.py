@@ -8,6 +8,11 @@ import json
 from datetime import datetime
 from discord_webhook import DiscordWebhookAlert
 
+# Allow overriding the MLB API Base URL for mock testing
+MLB_API_BASE_URL = os.getenv("MLB_API_BASE_URL")
+if MLB_API_BASE_URL:
+    mlb.BASE_URL = MLB_API_BASE_URL
+
 # Operator mapping for RuleEvaluator
 OPS = {
     "==": operator.eq,
@@ -55,14 +60,16 @@ def calculate_kelly(p, odds_american):
     b = (100 / abs(odds_american)) if odds_american < 0 else (odds_american / 100)
     q = 1 - p
     f_star = (b * p - q) / b
-    return max(0, f_star * 0.25) # 1/4 Kelly for safety
+    fraction = float(os.getenv("KELLY_FRACTION", 0.25))
+    return max(0, f_star * fraction)
 
 def get_db_connection():
     return psycopg2.connect(
         host=os.getenv("DB_HOST", "localhost"),
         database=os.getenv("DB_NAME", "mlb_engine"),
         user=os.getenv("DB_USER", "admin"),
-        password=os.getenv("DB_PASS", "password123")
+        password=os.getenv("DB_PASS", "password123"),
+        port=os.getenv("DB_PORT", "5432")
     )
 
 def get_redis_client():

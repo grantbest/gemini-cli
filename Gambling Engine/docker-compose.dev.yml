@@ -1,0 +1,19 @@
+services:
+  engine:
+    environment:
+      - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/dummy
+      - MLB_API_BASE_URL=http://mock_api:5000/api/v1
+    labels:
+      - "environment=development"
+
+  frontend:
+    environment:
+      - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/dummy
+    labels:
+      - "environment=development"
+
+  mock_api:
+    build: ./scripts/mock_api
+    container_name: mlb_mock_api
+    ports:
+      - "5001:5000"

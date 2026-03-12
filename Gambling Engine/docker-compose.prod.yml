@@ -1,0 +1,16 @@
+services:
+  engine:
+    restart: always
+    labels:
+      - "environment=production"
+
+  frontend:
+    restart: always
+    labels:
+      - "environment=production"
+
+  db:
+    restart: always
+
+  redis:
+    restart: always
