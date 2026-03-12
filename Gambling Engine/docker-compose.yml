@@ -52,9 +52,9 @@ services:
     environment:
       DATABASE_URL: postgresql://${DB_USER:-admin}:${DB_PASS:-password123}@db:5432/${DB_NAME:-mlb_engine}
       DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
-      NEXT_PUBLIC_APP_ENV: ${APP_ENV:-development}
-      NEXT_PUBLIC_DEV_URL: ${DEV_URL:-http://localhost:3000}
-      NEXT_PUBLIC_PROD_URL: ${PROD_URL:-https://prod.dosomething.inc}
+      APP_ENV: ${APP_ENV:-development}
+      DEV_URL: ${DEV_URL:-http://localhost:3000}
+      PROD_URL: ${PROD_URL:-http://localhost:3001}
     ports:
       - "3000:3000"
     depends_on:

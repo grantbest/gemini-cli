@@ -1,0 +1,75 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: mlb_betting_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: mlb_engine
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: mlb_message_bus
+    ports:
+      - "6379:6379"
+
+  mock_api:
+    build: ./scripts/mock_api
+    container_name: mlb_mock_api
+    ports:
+      - "5001:5000"
+
+  engine:
+    build: .
+    container_name: mlb_engine
+    environment:
+      PYTHONUNBUFFERED: 1
+      DB_HOST: db
+      DB_NAME: mlb_engine
+      DB_USER: admin
+      DB_PASS: password123
+      REDIS_HOST: redis
+      MLB_API_BASE_URL: http://mock_api:5000/api/v1
+    depends_on:
+      - db
+      - redis
+      - mock_api
+
+  # DEVELOPMENT STACK
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mlb_frontend_dev
+    environment:
+      DATABASE_URL: postgresql://admin:password123@db:5432/mlb_engine
+      APP_ENV: development
+      DEV_URL: http://localhost:3000
+      PROD_URL: http://localhost:3001
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  # PRODUCTION STACK (MOCK)
+  frontend-prod:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mlb_frontend_prod
+    environment:
+      DATABASE_URL: postgresql://admin:password123@db:5432/mlb_engine
+      APP_ENV: production
+      DEV_URL: http://localhost:3000
+      PROD_URL: http://localhost:3001
+    ports:
+      - "3001:3000"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

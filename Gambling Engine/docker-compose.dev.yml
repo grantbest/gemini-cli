@@ -10,6 +10,8 @@ services:
     environment:
       - DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/dummy
       - APP_ENV=development
+      - PROD_URL=http://localhost:3001
+      - DEV_URL=http://localhost:3000
     labels:
       - "environment=development"
 
