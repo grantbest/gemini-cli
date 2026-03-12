@@ -41,21 +41,18 @@ Focuses on stability and scale.
 *   Connects to live infrastructure and secure databases.
 
 ## 4. The Runtime Config Pattern
+... (previous content) ...
 
-To ensure the frontend knows which environment it's in without rebuilding the image, we use this pattern:
+## 6. Seeding Data for Testing
 
-1.  **Backend/API Route:** Create a server-side route (e.g., `/api/config`) that reads **non-prefixed** environment variables (e.g., `APP_ENV`).
-2.  **Frontend Component:** Fetch this config in a `useEffect` hook.
-3.  **UI Logic:** Render environment-specific badges or toggles based on the fetched state.
+To visualize the solution with sample data (e.g., on a fresh dev deploy), use the included seeding script:
 
-## 5. Implementation Checklist for New Projects
-
-1.  **Scaffold:** Copy the `.github/workflows/ci-cd.yml` and the `docker-compose*.yml` suite.
-2.  **GitHub Secrets:**
-    *   `DEV_SSH_HOST`, `DEV_SSH_USER`, `DEV_SSH_KEY`
-    *   `PROD_SSH_HOST`, `PROD_SSH_USER`, `PROD_SSH_KEY`
-3.  **Runtime Config:** Implement the `/api/config` endpoint in your frontend.
-4.  **Local Testing:** Use `docker-compose.test-multi.yml` to run dev and prod stacks side-by-side to verify toggles.
+1.  **Local:** `python scripts/seed_db.py`
+2.  **Remote (SSH):**
+    ```bash
+    ssh user@dev.bestfam.us "cd ~/apps/gambling-engine && docker compose exec engine python scripts/seed_db.py"
+    ```
+    *Note: Ensure the `DB_HOST` in the script matches the service name in your compose file (usually `db`).*
 
 ---
 *Created by Do Something Inc.*
