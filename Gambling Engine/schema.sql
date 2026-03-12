@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS inning_logs (
     baserunners INT,
     batters_faced_total INT,
     game_info VARCHAR(100),
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (game_id, inning_number, half)
 );
 

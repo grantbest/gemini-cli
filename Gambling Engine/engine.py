@@ -141,7 +141,11 @@ def log_inning_data(game_id, inning_number, half, runs, runners, game_info=None)
             INSERT INTO inning_logs (game_id, inning_number, half, runs_scored, baserunners, game_info) 
             VALUES (%s, %s, %s, %s, %s, %s)
             ON CONFLICT ON CONSTRAINT unique_inning 
-            DO UPDATE SET runs_scored = EXCLUDED.runs_scored, baserunners = EXCLUDED.baserunners, game_info = EXCLUDED.game_info
+            DO UPDATE SET 
+                runs_scored = EXCLUDED.runs_scored, 
+                baserunners = EXCLUDED.baserunners, 
+                game_info = EXCLUDED.game_info,
+                last_updated = CURRENT_TIMESTAMP
         """, (game_id, inning_number, half, runs, runners, game_info))
         conn.commit()
         cur.close()
@@ -260,8 +264,7 @@ def monitor_games(alerter, redis_client, ai_agent=None):
                 inn_num = idx + 1
                 for half in ['away', 'home']:
                     data = inning.get(half, {})
-                    if 'runs' in data:
-                        log_inning_data(game_id, inn_num, half, data.get('runs', 0), data.get('hits', 0) + data.get('leftOnBase', 0), game_info)
+                    log_inning_data(game_id, inn_num, half, data.get('runs', 0), data.get('hits', 0) + data.get('leftOnBase', 0), game_info)
 
             # Evaluate each dynamic rule
             for rule in rules:
