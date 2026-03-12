@@ -7,6 +7,7 @@ import operator
 import json
 from datetime import datetime
 from discord_webhook import DiscordWebhookAlert
+from ai_orchestrator import AIAgent
 
 # Allow overriding the MLB API Base URL for mock testing
 MLB_API_BASE_URL = os.getenv("MLB_API_BASE_URL")
@@ -206,7 +207,7 @@ def log_bet(game_id, system, odds, stake):
     finally:
         if conn: conn.close()
 
-def monitor_games(alerter, redis_client):
+def monitor_games(alerter, redis_client, ai_agent=None):
     """Main monitoring loop for dynamic rules."""
     active_game_ids = get_active_games()
     rules = get_active_rules()
@@ -270,8 +271,13 @@ def monitor_games(alerter, redis_client):
                     odds = config.get('odds', -110)
                     stake = calculate_kelly(p, odds)
                     
+                    ai_insight = None
+                    if ai_agent:
+                        print(f"Generating AI Insight for {rule['name']}...")
+                        ai_insight = ai_agent.generate_insight(rule['name'], state)
+                    
                     if rule['status'] == 'ACTIVE' and alerter:
-                        alerter.send_alert(rule['name'], game_id, "Dynamic Rule Trigger", odds, stake)
+                        alerter.send_alert(rule['name'], game_id, "Dynamic Rule Trigger", odds, stake, ai_insight)
                     
                     log_bet(game_id, rule['name'], odds, stake)
                     redis_client.setex(alert_key, 86400, "1")
@@ -287,6 +293,13 @@ if __name__ == "__main__":
     
     redis_client = get_redis_client()
     
+    ai_agent = None
+    try:
+        ai_agent = AIAgent()
+        print("✅ AI Orchestrator initialized.")
+    except Exception as e:
+        print(f"⚠️ AI Orchestrator failed to initialize: {e}")
+    
     while True:
-        monitor_games(alerter, redis_client)
+        monitor_games(alerter, redis_client, ai_agent)
         time.sleep(60) # Scan every minute

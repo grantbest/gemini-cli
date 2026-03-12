@@ -39,6 +39,8 @@ services:
       REDIS_HOST: redis
       DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
       KELLY_FRACTION: ${KELLY_FRACTION:-0.25}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3}
     depends_on:
       - db
       - redis

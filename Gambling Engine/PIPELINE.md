@@ -43,6 +43,13 @@ Focuses on stability and scale.
 ## 4. The Runtime Config Pattern
 ... (previous content) ...
 
+## 5. Agentic AI Architecture (Local LLM)
+
+To enhance decision-making without relying on external APIs, this project integrates a local Agentic AI layer powered by **Ollama**:
+*   **AI Orchestrator (`ai_orchestrator.py`):** Acts as the bridge between the Python engine and the local Ollama instance (defaulting to `host.docker.internal:11434` for Docker connectivity).
+*   **Insight Agent:** Triggered in real-time by `engine.py` to generate natural-language justifications for betting opportunities, embedding them directly into Discord alerts.
+*   **Analyst Agent:** A standalone script (`scripts/optimize_strategy.py`) that queries historical PostgreSQL data and asks Ollama to propose JSON-formatted tweaks to the dynamic betting rules.
+
 ## 6. Seeding Data for Testing
 
 To visualize the solution with sample data (e.g., on a fresh dev deploy), use the included seeding script:
