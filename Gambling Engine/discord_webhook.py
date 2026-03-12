@@ -1,0 +1,62 @@
+import requests
+import json
+
+class DiscordWebhookAlert:
+    """
+    A class to send formatted alerts to a Discord webhook.
+    """
+
+    def __init__(self, webhook_url: str):
+        if not webhook_url:
+            raise ValueError("Discord webhook URL cannot be empty.")
+        self.webhook_url = webhook_url
+
+    def send_alert(self, system_name: str, game_id: int, bet_target: str, odds: int, stake_percentage: float):
+        """
+        Formats and sends a betting alert to the Discord webhook.
+        """
+        embed = {
+            "title": f"📈 {system_name} Opportunity",
+            "description": f"A high-probability betting opportunity has been identified for Game ID **{game_id}**.",
+            "color": 3447003,  # Blue
+            "fields": [
+                {
+                    "name": "Game ID",
+                    "value": str(game_id),
+                    "inline": True
+                },
+                {
+                    "name": "Bet",
+                    "value": bet_target,
+                    "inline": True
+                },
+                {
+                    "name": "Odds",
+                    "value": str(odds),
+                    "inline": True
+                },
+                {
+                    "name": "Recommended Stake",
+                    "value": f"**{stake_percentage:.2%}** of Bankroll",
+                    "inline": True
+                }
+            ],
+            "footer": {
+                "text": "MLB Betting Engine | Please Bet Responsibly"
+            }
+        }
+
+        payload = {
+            "embeds": [embed]
+        }
+
+        try:
+            response = requests.post(
+                self.webhook_url,
+                data=json.dumps(payload),
+                headers={"Content-Type": "application/json"}
+            )
+            response.raise_for_status()
+            print(f"Successfully sent alert for Game ID: {game_id}")
+        except requests.exceptions.RequestException as e:
+            print(f"Error sending Discord alert: {e}")
