@@ -27,9 +27,11 @@ services:
       - "5050:80"
 
   engine:
+    image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME_PREFIX:-grantbest/gambling-engine}/engine:${IMAGE_TAG:-latest}
     build: .
     container_name: mlb_engine
     environment:
+      PYTHONUNBUFFERED: 1
       DB_HOST: db
       DB_NAME: ${DB_NAME:-mlb_engine}
       DB_USER: ${DB_USER:-admin}
@@ -42,6 +44,7 @@ services:
       - redis
 
   frontend:
+    image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME_PREFIX:-grantbest/gambling-engine}/frontend:${IMAGE_TAG:-latest}
     build:
       context: ./frontend
       dockerfile: Dockerfile

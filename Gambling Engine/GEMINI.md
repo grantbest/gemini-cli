@@ -13,7 +13,32 @@ This project is a Python-based analytics and betting engine for Major League Bas
 **Architecture:**
 The system is composed of a Python engine that fetches live MLB game data, applies several betting logic systems, and if a condition is met, calculates the optimal stake using the Kelly Criterion. It then sends a formatted alert to a Discord channel. The engine relies on a PostgreSQL database to log inning-by-inning data and track bets. All services (PostgreSQL, Redis, pgAdmin) are containerized using Docker.
 
-# Building and Running
+# GitOps & CI/CD
+
+The project includes a GitOps-ready CI/CD pipeline using GitHub Actions and Docker Compose.
+
+**Pipeline Workflows:**
+- **Build & Push:** On every push to `main` and `dev` branches, Docker images for the `engine`, `frontend`, and `mock-api` (dev-only) are built and pushed to the GitHub Container Registry (GHCR).
+- **Automated Deployment:**
+    - **Development:** Pushes to the `dev` branch automatically deploy to the development server using `docker-compose.yml` and `docker-compose.dev.yml`.
+    - **Production:** Pushes to the `main` branch automatically deploy to the production server using `docker-compose.yml` and `docker-compose.prod.yml`.
+
+**Required GitHub Secrets:**
+To enable automated deployments, set up the following secrets in your GitHub repository:
+- `DEV_SSH_HOST`: Hostname or IP of the development server.
+- `DEV_SSH_USER`: SSH username for the development server.
+- `DEV_SSH_KEY`: Private SSH key for accessing the development server.
+- `PROD_SSH_HOST`: Hostname or IP of the production server.
+- `PROD_SSH_USER`: SSH username for the production server.
+- `PROD_SSH_KEY`: Private SSH key for accessing the production server.
+- `DISCORD_WEBHOOK_URL`: (Production) The Discord webhook URL for betting alerts.
+- `DB_PASS`: (Production) The PostgreSQL password for the production database.
+
+**Environment Specifics:**
+- **Development:** Uses a mock API server (`scripts/mock_api`) to simulate MLB game data, allowing for testing without hitting rate limits or needing live games.
+- **Production:** Connects to live MLB APIs and uses a real Discord webhook.
+
+# Building and Running locally
 
 **1. Start Infrastructure:**
 To start the PostgreSQL database and Redis message broker, run:

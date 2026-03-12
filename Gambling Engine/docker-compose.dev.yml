@@ -13,6 +13,7 @@ services:
       - "environment=development"
 
   mock_api:
+    image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME_PREFIX:-grantbest/gambling-engine}/mock-api:${IMAGE_TAG:-latest}
     build: ./scripts/mock_api
     container_name: mlb_mock_api
     ports:
