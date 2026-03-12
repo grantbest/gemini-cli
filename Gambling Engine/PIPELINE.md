@@ -62,4 +62,4 @@ To visualize the solution with sample data (e.g., on a fresh dev deploy), use th
     *Note: Ensure the `DB_HOST` in the script matches the service name in your compose file (usually `db`).*
 
 ---
-*Created by Do Something Inc.*
+*Created by WE do it inc.*

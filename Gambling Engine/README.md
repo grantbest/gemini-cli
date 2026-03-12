@@ -1,4 +1,4 @@
-# Do Something Inc. | MLB Inning Betting Strategy Platform
+# WE do it inc. | MLB Inning Betting Strategy Platform
 
 This platform is a real-time analytics and betting engine designed to identify high-probability opportunities in MLB inning-based markets using historical patterns.
 

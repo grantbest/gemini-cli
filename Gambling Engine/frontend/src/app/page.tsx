@@ -168,7 +168,7 @@ export default function Dashboard() {
         <header className="flex flex-col lg:flex-row lg:justify-between lg:items-center border-b border-slate-800 pb-6 gap-6">
           <div className="flex flex-col">
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Do Something Inc. | Betting Engine</h1>
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">WE do it inc. | Betting Engine</h1>
               <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest border ${
                 isProd ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
               }`}>

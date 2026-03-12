@@ -42,7 +42,7 @@ class DiscordWebhookAlert:
                 }
             ],
             "footer": {
-                "text": "Do Something Inc. | Please Bet Responsibly"
+                "text": "WE do it inc. | Please Bet Responsibly"
             }
         }
 

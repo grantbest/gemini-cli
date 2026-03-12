@@ -9,13 +9,13 @@ export async function POST() {
 
   const embed = {
     title: "🧪 Test Alert",
-    description: "This is a test alert from the Do Something Inc. management dashboard.",
+    description: "This is a test alert from the WE do it inc. management dashboard.",
     color: 3447003,
     fields: [
       { name: "Status", value: "Functional", inline: true },
       { name: "Environment", value: "Production/Live", inline: true }
     ],
-    footer: { text: "Do Something Inc." }
+    footer: { text: "WE do it inc." }
   };
 
   try {

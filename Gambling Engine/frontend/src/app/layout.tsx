@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Do Something Inc. | Betting Engine",
+  title: "WE do it inc. | Betting Engine",
   description: "Advanced MLB Betting Analytics & Real-time Alerts",
 };
 
