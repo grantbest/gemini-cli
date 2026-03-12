@@ -1,21 +1,45 @@
 services:
-  db:
+  # --- DEVELOPMENT STACK (Mock Data) ---
+  db-dev:
     image: postgres:15-alpine
-    container_name: mlb_betting_db
+    container_name: mlb_db_dev
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password123
-      POSTGRES_DB: mlb_engine
+      POSTGRES_DB: mlb_engine_dev
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_dev:/var/lib/postgresql/data
 
-  redis:
-    image: redis:7-alpine
-    container_name: mlb_message_bus
+  engine-dev:
+    build: .
+    container_name: mlb_engine_dev
+    environment:
+      DB_HOST: db-dev
+      DB_NAME: mlb_engine_dev
+      DB_USER: admin
+      DB_PASS: password123
+      MLB_API_BASE_URL: http://mock_api:5000/api/v1
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+    depends_on:
+      - db-dev
+      - mock_api
+
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mlb_frontend_dev
+    environment:
+      DATABASE_URL: postgresql://admin:password123@db-dev:5432/mlb_engine_dev
+      APP_ENV: development
+      PROD_URL: http://localhost:3001
+      DEV_URL: http://localhost:3000
     ports:
-      - "6379:6379"
+      - "3000:3000"
+    depends_on:
+      - db-dev
 
   mock_api:
     build: ./scripts/mock_api
@@ -23,55 +47,48 @@ services:
     ports:
       - "5001:5000"
 
-  engine:
-    build: .
-    container_name: mlb_engine
+  # --- PRODUCTION STACK (Live Data) ---
+  db-prod:
+    image: postgres:15-alpine
+    container_name: mlb_db_prod
     environment:
-      PYTHONUNBUFFERED: 1
-      DB_HOST: db
-      DB_NAME: mlb_engine
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: mlb_engine_prod
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+
+  engine-prod:
+    build: .
+    container_name: mlb_engine_prod
+    environment:
+      DB_HOST: db-prod
+      DB_NAME: mlb_engine_prod
       DB_USER: admin
       DB_PASS: password123
-      REDIS_HOST: redis
-      MLB_API_BASE_URL: http://mock_api:5000/api/v1
+      # No MLB_API_BASE_URL means it hits LIVE MLB API
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
     depends_on:
-      - db
-      - redis
-      - mock_api
+      - db-prod
 
-  # DEVELOPMENT STACK
-  frontend-dev:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: mlb_frontend_dev
-    environment:
-      DATABASE_URL: postgresql://admin:password123@db:5432/mlb_engine
-      APP_ENV: development
-      DEV_URL: http://localhost:3000
-      PROD_URL: http://localhost:3001
-      DISCORD_CHANNEL_URL: https://discord.com/channels/your-channel-id
-    ports:
-      - "3000:3000"
-    depends_on:
-      - db
-
-  # PRODUCTION STACK (MOCK)
   frontend-prod:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: mlb_frontend_prod
     environment:
-      DATABASE_URL: postgresql://admin:password123@db:5432/mlb_engine
+      DATABASE_URL: postgresql://admin:password123@db-prod:5432/mlb_engine_prod
       APP_ENV: production
-      DEV_URL: http://localhost:3000
       PROD_URL: http://localhost:3001
-      DISCORD_CHANNEL_URL: https://discord.com/channels/your-channel-id
+      DEV_URL: http://localhost:3000
     ports:
       - "3001:3000"
     depends_on:
-      - db
+      - db-prod
 
 volumes:
-  postgres_data:
+  postgres_data_dev:
+  postgres_data_prod:

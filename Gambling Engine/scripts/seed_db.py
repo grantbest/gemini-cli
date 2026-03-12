@@ -1,5 +1,6 @@
 import psycopg2
 import os
+import sys
 import random
 from datetime import datetime, timedelta
 
@@ -8,19 +9,21 @@ DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_NAME = os.getenv("DB_NAME", "mlb_engine")
 DB_USER = os.getenv("DB_USER", "admin")
 DB_PASS = os.getenv("DB_PASS", "password123")
+DB_PORT = os.getenv("DB_PORT", "5432")
 
-def seed_data():
+def seed_data(teams_only=False):
     conn = None
     try:
         conn = psycopg2.connect(
             host=DB_HOST,
             database=DB_NAME,
             user=DB_USER,
-            password=DB_PASS
+            password=DB_PASS,
+            port=DB_PORT
         )
         cur = conn.cursor()
 
-        print("Clearing existing data...")
+        print(f"Clearing existing data in {DB_NAME}...")
         cur.execute("TRUNCATE TABLE bet_tracking, inning_logs, teams, betting_rules RESTART IDENTITY CASCADE;")
 
         # 1. Seed Teams & Bullpen Rankings
@@ -47,50 +50,37 @@ def seed_data():
         ]
         cur.executemany("INSERT INTO betting_rules (name, description, status, conditions_json) VALUES (%s, %s, %s, %s)", rules)
 
-        # 3. Seed Inning Logs (Simulating raw data feed)
-        print("Seeding Live Inning Logs...")
-        logs = []
-        # Game 1: Big Inning Trigger (3 runs, 5 baserunners in 3rd)
-        logs.append((744798, 3, 'top', 3, 5, 9))
-        # Game 2: NR2I Trigger (Both score in 1st)
-        logs.append((744880, 1, 'top', 1, 2, 6))
-        logs.append((744880, 1, 'bottom', 2, 3, 7))
-        # Game 3: Fatigue Trigger (High activity in 4th)
-        logs.append((745201, 4, 'bottom', 0, 4, 10))
-        
-        cur.executemany("INSERT INTO inning_logs (game_id, inning_number, half, runs_scored, baserunners, batters_faced_total) VALUES (%s, %s, %s, %s, %s, %s)", logs)
+        if not teams_only:
+            # 3. Seed Inning Logs (Simulating raw data feed)
+            print("Seeding Live Inning Logs...")
+            logs = []
+            logs.append((744798, 3, 'top', 3, 5, 9))
+            logs.append((744880, 1, 'top', 1, 2, 6))
+            logs.append((744880, 1, 'bottom', 2, 3, 7))
+            logs.append((745201, 4, 'bottom', 0, 4, 10))
+            cur.executemany("INSERT INTO inning_logs (game_id, inning_number, half, runs_scored, baserunners, batters_faced_total) VALUES (%s, %s, %s, %s, %s, %s)", logs)
 
-        # 4. Seed Bet History (Visualizing performance across all systems)
-        print("Seeding Bet History & Analytics...")
-        history = [
-            # System 1: NR2I Regression (Wins and Losses)
-            (744880, 'NR2I Regression', -115, 0.05, 'WON', datetime.now() - timedelta(hours=2)),
-            (745282, 'NR2I Regression', -110, 0.04, 'LOST', datetime.now() - timedelta(hours=5)),
-            (745686, 'NR2I Regression', -105, 0.05, 'WON', datetime.now() - timedelta(days=1)),
-            
-            # System 2: Big Inning Momentum
-            (744798, 'Big Inning Momentum', 110, 0.06, 'PENDING', datetime.now() - timedelta(minutes=15)),
-            (746174, 'Big Inning Momentum', 105, 0.06, 'WON', datetime.now() - timedelta(hours=3)),
-            (746416, 'Big Inning Momentum', 115, 0.05, 'WON', datetime.now() - timedelta(days=1)),
-            
-            # System 3: 5th Inning Fatigue
-            (745201, '5th Inning Fatigue', -110, 0.03, 'PENDING', datetime.now() - timedelta(minutes=5)),
-            (746577, '5th Inning Fatigue', -120, 0.03, 'LOST', datetime.now() - timedelta(hours=8)),
-            
-            # System 4: Late Bullpen
-            (746820, 'Late Bullpen', -115, 0.08, 'WON', datetime.now() - timedelta(hours=1)),
-            (746901, 'Late Bullpen', -110, 0.07, 'WON', datetime.now() - timedelta(days=2))
-        ]
-        cur.executemany("INSERT INTO bet_tracking (game_id, system_triggered, odds_taken, stake, result, created_at) VALUES (%s, %s, %s, %s, %s, %s)", history)
+            # 4. Seed Bet History
+            print("Seeding Bet History & Analytics...")
+            history = [
+                (744880, 'NR2I Regression', -115, 0.05, 'WON', "Low scoring environment with elite bullpen relief.", datetime.now() - timedelta(hours=2)),
+                (745282, 'NR2I Regression', -110, 0.04, 'LOST', "High velocity offense overcame regression pattern.", datetime.now() - timedelta(hours=5)),
+                (745686, 'NR2I Regression', -105, 0.05, 'WON', "Standard regression in favorable park factors.", datetime.now() - timedelta(days=1)),
+                (744798, 'Big Inning Momentum', 110, 0.06, 'PENDING', "Offense still hot after 3-run burst.", datetime.now() - timedelta(minutes=15)),
+                (746174, 'Big Inning Momentum', 105, 0.06, 'WON', "Momentum carried into the next frame as predicted.", datetime.now() - timedelta(hours=3)),
+                (746416, 'Big Inning Momentum', 115, 0.05, 'WON', "Reliever struggled to find zone after long wait.", datetime.now() - timedelta(days=1)),
+                (745201, '5th Inning Fatigue', -110, 0.03, 'PENDING', "Starter pitch count exceeds 85; 3rd time through order.", datetime.now() - timedelta(minutes=5)),
+                (746577, '5th Inning Fatigue', -120, 0.03, 'LOST', "Starter pulled early; bullpen escaped jam.", datetime.now() - timedelta(hours=8)),
+                (746820, 'Late Bullpen', -115, 0.08, 'WON', "Top-5 ERA bullpen secured the clean inning.", datetime.now() - timedelta(hours=1)),
+                (746901, 'Late Bullpen', -110, 0.07, 'WON', "Defensive shifts mitigated late scoring threats.", datetime.now() - timedelta(days=2))
+            ]
+            cur.executemany("INSERT INTO bet_tracking (game_id, system_triggered, odds_taken, stake, result, ai_insight, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s)", history)
 
         conn.commit()
-        print("\n✅ Database seeded successfully!")
-        print(f"Total Teams: {len(teams_data)}")
-        print(f"Total History Records: {len(history)}")
-        print(f"Total Active Logs: {len(logs)}")
+        print(f"\n✅ {DB_NAME} seeded successfully!")
 
     except Exception as e:
-        print(f"❌ Error seeding database: {e}")
+        print(f"❌ Error seeding database {DB_NAME}: {e}")
         if conn:
             conn.rollback()
     finally:
@@ -99,4 +89,5 @@ def seed_data():
             conn.close()
 
 if __name__ == "__main__":
-    seed_data()
+    teams_only_flag = "--teams-only" in sys.argv
+    seed_data(teams_only=teams_only_flag)

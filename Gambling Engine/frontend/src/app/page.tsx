@@ -13,7 +13,8 @@ import {
   ExternalLink,
   Cpu,
   BrainCircuit,
-  MessageSquare
+  MessageSquare,
+  ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { 
@@ -158,40 +159,41 @@ export default function Dashboard() {
   if (!config) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500">Loading Configuration...</div>;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 p-6 font-sans">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-slate-950 text-slate-50 p-4 md:p-6 font-sans">
+      <div className="max-w-7xl mx-auto space-y-6 md:y-8">
         
         {/* Header */}
-        <header className="flex justify-between items-center border-b border-slate-800 pb-6">
+        <header className="flex flex-col lg:flex-row lg:justify-between lg:items-center border-b border-slate-800 pb-6 gap-6">
           <div className="flex flex-col">
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold tracking-tight">Do Something Inc. | Betting Engine</h1>
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Do Something Inc. | Betting Engine</h1>
               <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest border ${
                 isProd ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
               }`}>
                 {currentEnv}
               </span>
             </div>
-            <p className="text-slate-400 mt-1">Real-time management & analytics dashboard.</p>
+            <p className="text-slate-400 mt-1 text-sm md:text-base">Real-time management & analytics dashboard.</p>
           </div>
-          <div className="flex items-center gap-4">
+          
+          <div className="flex flex-wrap items-center gap-3 md:gap-4">
             <a 
               href={switchUrl}
               className="text-xs text-slate-500 hover:text-blue-400 transition-colors flex items-center gap-1 border border-slate-800 px-3 py-2 rounded-lg hover:border-blue-500/30"
             >
-              <Activity size={12} /> Switch to {isProd ? 'Dev' : 'Production'}
+              <Activity size={12} /> <span className="hidden sm:inline">Switch to</span> {isProd ? 'Dev' : 'Production'}
             </a>
             <Link 
               href="/rules"
               className="bg-blue-600/10 border border-blue-500/20 hover:bg-blue-600/20 text-blue-400 px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2"
             >
-              <Settings size={16} /> Rules Engine
+              <Settings size={16} /> <span className="hidden sm:inline">Rules Engine</span>
             </Link>
             <div className="flex flex-col gap-1">
               <button 
                 onClick={sendTestAlert}
                 disabled={testLoading}
-                className="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 px-4 py-2 rounded-lg text-sm transition-all disabled:opacity-50"
+                className="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 px-4 py-2 rounded-lg text-sm transition-all disabled:opacity-50 min-h-[40px]"
               >
                 {testLoading ? 'Sending...' : 'Test Discord Alert'}
               </button>
@@ -199,7 +201,7 @@ export default function Dashboard() {
                 href={config.discordChannelUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[10px] text-slate-500 hover:text-indigo-400 transition-colors flex items-center justify-center gap-1"
+                className="text-[10px] text-slate-500 hover:text-indigo-400 transition-colors flex items-center justify-center gap-1 py-1"
               >
                 <ExternalLink size={10} /> View Discord Channel
               </a>
@@ -212,29 +214,35 @@ export default function Dashboard() {
         </header>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title="Total Opportunities" value={stats.total} icon={<Activity className="text-blue-400" />} />
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          <StatCard title="Opportunities" value={stats.total} icon={<Activity className="text-blue-400" />} />
           <StatCard title="Win Rate" value={`${stats.winRate}%`} icon={<Trophy className="text-yellow-400" />} />
           <StatCard title="Total Wins" value={stats.wins} icon={<CheckCircle className="text-emerald-400" />} />
-          <StatCard title="Pending Resolution" value={stats.pending} icon={<Clock className="text-slate-400" />} />
+          <StatCard title="Pending" value={stats.pending} icon={<Clock className="text-slate-400" />} />
         </div>
 
-        {/* Tabs Switcher */}
-        <div className="flex gap-1 bg-slate-900/80 p-1 rounded-xl w-fit border border-slate-800">
-          <TabButton active={activeTab === 'bets'} onClick={() => setActiveTab('bets')} icon={<Trophy size={16} />} label="Bet History" />
-          <TabButton active={activeTab === 'feed'} onClick={() => setActiveTab('feed')} icon={<Database size={16} />} label="Live Data Feed" />
-          <TabButton active={activeTab === 'teams'} onClick={() => setActiveTab('teams')} icon={<ShieldAlert size={16} />} label="Bullpen Rankings" />
-          <TabButton active={activeTab === 'ai'} onClick={() => setActiveTab('ai')} icon={<Cpu size={16} />} label="AI Strategy Lab" />
+        {/* Tabs Switcher - Scrollable on mobile */}
+        <div className="overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex gap-1 bg-slate-900/80 p-1 rounded-xl w-max md:w-fit border border-slate-800">
+            <TabButton active={activeTab === 'bets'} onClick={() => setActiveTab('bets')} icon={<Trophy size={16} />} label="Bet History" />
+            <TabButton active={activeTab === 'feed'} onClick={() => setActiveTab('feed')} icon={<Database size={16} />} label="Live Feed" />
+            <TabButton active={activeTab === 'teams'} onClick={() => setActiveTab('teams')} icon={<ShieldAlert size={16} />} label="Teams" />
+            <TabButton active={activeTab === 'ai'} onClick={() => setActiveTab('ai')} icon={<Cpu size={16} />} label="AI Lab" />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
+            
+            {/* BET HISTORY TAB */}
             {activeTab === 'bets' && (
               <div className="bg-slate-900/50 rounded-xl border border-slate-800 overflow-hidden">
-                <div className="p-6 border-b border-slate-800 flex justify-between items-center">
-                  <h2 className="text-xl font-semibold">Opportunities Tracked</h2>
+                <div className="p-4 md:p-6 border-b border-slate-800 flex justify-between items-center">
+                  <h2 className="text-lg md:text-xl font-semibold">Opportunities Tracked</h2>
                 </div>
-                <div className="overflow-x-auto">
+                
+                {/* Desktop Table View */}
+                <div className="hidden lg:block overflow-x-auto">
                   <table className="w-full text-left">
                     <thead className="text-xs uppercase text-slate-500 bg-slate-950/50">
                       <tr>
@@ -248,9 +256,9 @@ export default function Dashboard() {
                     </thead>
                     <tbody className="divide-y divide-slate-800">
                       {loading ? (
-                        <tr><td colSpan={6} className="px-6 py-8 text-center text-slate-500">Loading data...</td></tr>
+                        <tr><td colSpan={6} className="px-6 py-8 text-center text-slate-500">Loading...</td></tr>
                       ) : bets.length === 0 ? (
-                        <tr><td colSpan={6} className="px-6 py-8 text-center text-slate-500">No bets tracked yet.</td></tr>
+                        <tr><td colSpan={6} className="px-6 py-8 text-center text-slate-500">No data.</td></tr>
                       ) : (
                         bets.map((bet) => (
                           <tr key={bet.bet_id} className="hover:bg-slate-800/30 transition-colors group">
@@ -268,9 +276,7 @@ export default function Dashboard() {
                                     {bet.ai_insight}
                                   </div>
                                 </div>
-                              ) : (
-                                <span className="text-slate-700">-</span>
-                              )}
+                              ) : <span className="text-slate-700">-</span>}
                             </td>
                             <td className="px-6 py-4">
                               {bet.result === 'PENDING' && (
@@ -290,21 +296,64 @@ export default function Dashboard() {
                     </tbody>
                   </table>
                 </div>
+
+                {/* Mobile Card View */}
+                <div className="lg:hidden divide-y divide-slate-800">
+                  {loading ? (
+                    <div className="p-8 text-center text-slate-500">Loading...</div>
+                  ) : bets.map((bet) => (
+                    <div key={bet.bet_id} className="p-4 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Game ID</p>
+                          <p className="font-mono text-blue-400">#{bet.game_id}</p>
+                        </div>
+                        <StatusBadge status={bet.result} />
+                      </div>
+                      <div className="flex justify-between items-end">
+                        <div>
+                          <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">System</p>
+                          <p className="text-sm font-medium">{bet.system_triggered}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Stake</p>
+                          <p className="text-sm">{(bet.stake * 100).toFixed(1)}%</p>
+                        </div>
+                      </div>
+                      {bet.ai_insight && (
+                        <div className="bg-indigo-500/5 border border-indigo-500/10 p-3 rounded-lg flex gap-2">
+                          <BrainCircuit size={14} className="text-indigo-400 shrink-0 mt-0.5" />
+                          <p className="text-[10px] text-slate-400 leading-relaxed italic">{bet.ai_insight}</p>
+                        </div>
+                      )}
+                      {bet.result === 'PENDING' && (
+                        <div className="flex gap-2 pt-2">
+                          <button onClick={() => updateResult(bet.bet_id, 'WON')} className="flex-1 bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1">
+                            <CheckCircle size={14} /> WON
+                          </button>
+                          <button onClick={() => updateResult(bet.bet_id, 'LOST')} className="flex-1 bg-rose-600/10 border border-rose-500/20 text-rose-400 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1">
+                            <XCircle size={14} /> LOST
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
+            {/* LIVE FEED TAB */}
             {activeTab === 'feed' && (
               <div className="bg-slate-900/50 rounded-xl border border-slate-800 overflow-hidden">
-                <div className="p-6 border-b border-slate-800">
-                  <h2 className="text-xl font-semibold">Live Inning Logs</h2>
-                  <p className="text-xs text-slate-500 mt-1">Real-time data flow from MLB-StatsAPI.</p>
+                <div className="p-4 md:p-6 border-b border-slate-800">
+                  <h2 className="text-lg md:text-xl font-semibold">Live Inning Logs</h2>
                 </div>
-                <div className="overflow-x-auto">
+                
+                {/* Desktop Feed Table */}
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full text-left">
                     <thead className="text-xs uppercase text-slate-500 bg-slate-950/50">
                       <tr>
-                        <th className="px-6 py-4">Log ID</th>
-                        <th className="px-6 py-4">Game ID</th>
                         <th className="px-6 py-4">Inning</th>
                         <th className="px-6 py-4">Half</th>
                         <th className="px-6 py-4 text-emerald-400">Runs</th>
@@ -314,8 +363,6 @@ export default function Dashboard() {
                     <tbody className="divide-y divide-slate-800 font-mono text-sm">
                       {logs.map((log) => (
                         <tr key={log.log_id} className="hover:bg-slate-800/30 transition-colors">
-                          <td className="px-6 py-3 text-slate-500">#{log.log_id}</td>
-                          <td className="px-6 py-3 text-blue-400">{log.game_id}</td>
                           <td className="px-6 py-3">{log.inning_number}</td>
                           <td className="px-6 py-3 uppercase">{log.half}</td>
                           <td className="px-6 py-3 text-emerald-400 font-bold">{log.runs_scored}</td>
@@ -325,61 +372,85 @@ export default function Dashboard() {
                     </tbody>
                   </table>
                 </div>
+
+                {/* Mobile Feed Cards */}
+                <div className="md:hidden divide-y divide-slate-800">
+                  {logs.map((log) => (
+                    <div key={log.log_id} className="p-4 flex justify-between items-center bg-slate-950/20">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-lg font-bold">{log.inning_number}</span>
+                        <span className="text-[10px] text-slate-500 uppercase font-black">{log.half}</span>
+                      </div>
+                      <div className="flex gap-4">
+                        <div className="text-center">
+                          <p className="text-[8px] text-slate-500 uppercase">Runs</p>
+                          <p className="text-emerald-400 font-mono font-bold">{log.runs_scored}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-[8px] text-slate-500 uppercase">Runners</p>
+                          <p className="text-blue-400 font-mono font-bold">{log.baserunners}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
+            {/* TEAMS TAB */}
+            {activeTab === 'teams' && (
+              <div className="bg-slate-900/50 rounded-xl border border-slate-800 overflow-hidden">
+                <div className="p-4 md:p-6 border-b border-slate-800">
+                  <h2 className="text-lg md:text-xl font-semibold">Bullpen Rankings</h2>
+                </div>
+                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-px bg-slate-800">
+                  {teams.map((team) => (
+                    <div key={team.team_id} className="bg-slate-950 p-3 md:p-4 flex flex-col items-center gap-1">
+                      <span className="text-xl md:text-2xl font-black text-slate-700">#{team.bullpen_era_rank}</span>
+                      <span className="text-md md:text-lg font-bold text-white">{team.abbreviation}</span>
+                      <div className={`h-1 w-full rounded-full mt-2 ${team.bullpen_era_rank <= 10 ? 'bg-emerald-500' : team.bullpen_era_rank <= 20 ? 'bg-yellow-500' : 'bg-rose-500'}`} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* AI LAB TAB */}
             {activeTab === 'ai' && (
               <div className="bg-slate-900/50 rounded-xl border border-slate-800 overflow-hidden flex flex-col min-h-[400px]">
-                <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-indigo-500/5">
+                <div className="p-4 md:p-6 border-b border-slate-800 flex flex-col sm:flex-row sm:justify-between sm:items-center bg-indigo-500/5 gap-4">
                   <div>
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
+                    <h2 className="text-lg md:text-xl font-semibold flex items-center gap-2">
                       <Cpu className="text-indigo-400" size={20} /> AI Strategy Lab
                     </h2>
-                    <p className="text-xs text-slate-500 mt-1">Direct analysis from local Ollama LLM (llama3).</p>
+                    <p className="text-xs text-slate-500 mt-1">Direct analysis from local Ollama (llama3).</p>
                   </div>
                   <button 
                     onClick={fetchAiAnalysis}
                     disabled={aiLoading}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm transition-all disabled:opacity-50 flex items-center gap-2"
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-3 rounded-lg text-sm font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2 w-full sm:w-auto"
                   >
                     {aiLoading ? <Activity size={16} className="animate-spin" /> : <BrainCircuit size={16} />}
-                    {aiLoading ? 'Analyzing Patterns...' : 'Run Strategy Audit'}
+                    {aiLoading ? 'Analyzing...' : 'Run Strategy Audit'}
                   </button>
                 </div>
                 
-                <div className="p-8 flex-1">
+                <div className="p-4 md:p-8 flex-1">
                   {aiLoading ? (
                     <div className="flex flex-col items-center justify-center h-full space-y-4 py-12">
-                      <div className="relative">
-                        <Cpu size={48} className="text-indigo-500/20 animate-pulse" />
-                        <BrainCircuit size={24} className="text-indigo-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-bounce" />
-                      </div>
-                      <div className="text-center space-y-2">
-                        <p className="text-indigo-300 font-medium animate-pulse">Consulting Local LLM...</p>
-                        <p className="text-slate-500 text-xs max-w-xs">Ollama is reviewing {bets.length} historical bets against {teams.length} team profiles.</p>
-                      </div>
+                      <Cpu size={48} className="text-indigo-500/20 animate-pulse" />
+                      <p className="text-indigo-300 font-medium animate-pulse text-center">Consulting Local LLM...</p>
                     </div>
                   ) : aiAnalysis ? (
                     <div className="prose prose-invert max-w-none">
-                      <div className="bg-slate-950/50 border border-slate-800 p-6 rounded-xl shadow-inner whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-300">
+                      <div className="bg-slate-950/50 border border-slate-800 p-4 md:p-6 rounded-xl shadow-inner whitespace-pre-wrap font-sans text-xs md:text-sm leading-relaxed text-slate-300">
                         {aiAnalysis}
-                      </div>
-                      <div className="mt-6 flex items-start gap-3 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-lg">
-                        <MessageSquare size={18} className="text-indigo-400 mt-0.5" />
-                        <p className="text-xs text-indigo-200/70 italic">
-                          This analysis is generated by a local LLM and should be used to support, not replace, human judgment.
-                        </p>
                       </div>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center h-full py-12 text-center space-y-4">
-                      <div className="bg-slate-900 p-4 rounded-full border border-slate-800">
-                        <Cpu size={32} className="text-slate-700" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-slate-400 font-medium">Ready for Strategy Audit</p>
-                        <p className="text-slate-600 text-xs">Run the audit to identify patterns in your betting history.</p>
-                      </div>
+                      <Cpu size={32} className="text-slate-700" />
+                      <p className="text-slate-400 font-medium">Ready for Strategy Audit</p>
                     </div>
                   )}
                 </div>
@@ -387,19 +458,19 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Analytics Column */}
-          <div className="space-y-8">
-            <div className="bg-slate-900/50 rounded-xl border border-slate-800 p-6">
-              <h2 className="text-xl font-semibold mb-6">Wins by System</h2>
-              <div className="h-64">
+          {/* Analytics Column - Hidden on mobile if not focused */}
+          <div className="space-y-6 md:y-8">
+            <div className="bg-slate-900/50 rounded-xl border border-slate-800 p-4 md:p-6">
+              <h2 className="text-lg md:text-xl font-semibold mb-6">Wins by System</h2>
+              <div className="h-48 md:h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                    <XAxis dataKey="name" stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                    <XAxis dataKey="name" stroke="#64748b" fontSize={8} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
                     <Tooltip 
                       contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
-                      itemStyle={{ color: '#94a3b8' }}
+                      itemStyle={{ color: '#94a3b8', fontSize: '10px' }}
                     />
                     <Bar dataKey="wins">
                       {chartData.map((entry, index) => (
@@ -411,11 +482,11 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-blue-600/20 to-emerald-600/20 rounded-xl border border-blue-500/20 p-6">
-              <h3 className="text-lg font-semibold text-blue-300">Strategy Insight</h3>
-              <p className="text-slate-400 text-sm mt-2 leading-relaxed">
-                The engine is currently tracking {logs.length} data points across active games.
-                {teams.length > 0 && ` System 2 is prioritizing fade opportunities against teams like ${teams[teams.length - 1].abbreviation} (Rank ${teams[teams.length - 1].bullpen_era_rank}).`}
+            <div className="bg-gradient-to-br from-blue-600/20 to-emerald-600/20 rounded-xl border border-blue-500/20 p-4 md:p-6">
+              <h3 className="text-md font-semibold text-blue-300">Live Strategy Context</h3>
+              <p className="text-slate-400 text-xs md:text-sm mt-2 leading-relaxed italic">
+                Scanning {logs.length} data points. 
+                {teams.length > 0 && ` Favoring matchups against ${teams[teams.length-1].abbreviation} (Rank ${teams[teams.length-1].bullpen_era_rank}).`}
               </p>
             </div>
           </div>
@@ -427,12 +498,12 @@ export default function Dashboard() {
 
 function StatCard({ title, value, icon }: { title: string; value: string | number; icon: React.ReactNode }) {
   return (
-    <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800 flex flex-col gap-2">
+    <div className="bg-slate-900/50 p-4 md:p-6 rounded-xl border border-slate-800 flex flex-col gap-1 md:gap-2">
       <div className="flex justify-between items-start">
-        <span className="text-slate-400 text-sm font-medium">{title}</span>
-        {icon}
+        <span className="text-slate-500 text-[10px] md:text-sm font-bold uppercase tracking-wider">{title}</span>
+        <div className="scale-75 md:scale-100 opacity-50 md:opacity-100">{icon}</div>
       </div>
-      <span className="text-3xl font-bold tracking-tight">{value}</span>
+      <span className="text-xl md:text-3xl font-black tracking-tight">{value}</span>
     </div>
   );
 }
@@ -441,10 +512,10 @@ function TabButton({ active, onClick, icon, label }: { active: boolean; onClick:
   return (
     <button 
       onClick={onClick}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+      className={`flex items-center gap-2 px-4 py-3 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${
         active 
           ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
-          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+          : 'text-slate-500 hover:text-slate-200 hover:bg-slate-800'
       }`}
     >
       {icon}
@@ -460,7 +531,7 @@ function StatusBadge({ status }: { status: string }) {
     PENDING: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
   };
   return (
-    <span className={`px-2 py-1 rounded text-[10px] font-bold border ${styles[status]}`}>
+    <span className={`px-2 py-1 rounded text-[9px] md:text-[10px] font-black border tracking-tighter ${styles[status]}`}>
       {status}
     </span>
   );
