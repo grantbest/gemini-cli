@@ -62,7 +62,19 @@ export default function RulesEngine() {
         fetch('/api/rules'),
         fetch('/api/config')
       ]);
-      setRules(await rulesRes.json());
+      const rawRules = await rulesRes.json();
+      
+      const sanitizedRules = rawRules.map((rule: BettingRule) => ({
+        ...rule,
+        conditions_json: rule.conditions_json && typeof rule.conditions_json === 'object' 
+          ? {
+              logic: rule.conditions_json.logic || 'AND',
+              conditions: Array.isArray(rule.conditions_json.conditions) ? rule.conditions_json.conditions : []
+            }
+          : { logic: 'AND', conditions: [] }
+      }));
+
+      setRules(sanitizedRules);
       setConfig(await configRes.json());
     } catch (err) {
       console.error('Failed to fetch data', err);
@@ -70,9 +82,25 @@ export default function RulesEngine() {
   };
 
   const fetchRules = async () => {
-    const res = await fetch('/api/rules');
-    const data = await res.json();
-    setRules(data);
+    try {
+      const res = await fetch('/api/rules');
+      const data = await res.json();
+      
+      // Ensure every rule has a valid conditions_json structure to prevent React crashes
+      const sanitizedRules = data.map((rule: BettingRule) => ({
+        ...rule,
+        conditions_json: rule.conditions_json && typeof rule.conditions_json === 'object' 
+          ? {
+              logic: rule.conditions_json.logic || 'AND',
+              conditions: Array.isArray(rule.conditions_json.conditions) ? rule.conditions_json.conditions : []
+            }
+          : { logic: 'AND', conditions: [] }
+      }));
+      
+      setRules(sanitizedRules);
+    } catch (err) {
+      console.error('Failed to fetch rules', err);
+    }
   };
 
   useEffect(() => {
