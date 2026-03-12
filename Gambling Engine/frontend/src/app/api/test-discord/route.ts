@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 
 export async function POST() {
-  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+  // Priority: Database Setting -> Environment Variable
+  const settingsRes = await query("SELECT setting_value FROM system_settings WHERE setting_key = 'discord_webhook_url'");
+  const webhookUrl = settingsRes.rows[0]?.setting_value || process.env.DISCORD_WEBHOOK_URL;
 
-  if (!webhookUrl || webhookUrl.includes('dummy')) {
+  if (!webhookUrl || webhookUrl.includes('dummy') || webhookUrl.includes('placeholder')) {
     return NextResponse.json({ error: 'No valid Discord webhook URL configured.' }, { status: 400 });
   }
 

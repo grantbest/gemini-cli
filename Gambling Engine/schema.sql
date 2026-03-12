@@ -43,3 +43,15 @@ CREATE TABLE IF NOT EXISTS betting_rules (
     action_config JSONB,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- System Settings Table
+CREATE TABLE IF NOT EXISTS system_settings (
+    setting_key VARCHAR(50) PRIMARY KEY,
+    setting_value TEXT NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insert default placeholder for Discord Webhook if not exists
+INSERT INTO system_settings (setting_key, setting_value) 
+VALUES ('discord_webhook_url', 'https://discord.com/api/webhooks/placeholder')
+ON CONFLICT (setting_key) DO NOTHING;

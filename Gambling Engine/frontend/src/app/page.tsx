@@ -9,6 +9,7 @@ import {
   Clock,
   Database,
   ShieldAlert,
+  ShieldCheck,
   Settings,
   ExternalLink,
   Cpu,
@@ -185,6 +186,12 @@ export default function Dashboard() {
             >
               <Activity size={12} /> <span className="hidden sm:inline">Switch to</span> {isProd ? 'Dev' : 'Production'}
             </a>
+            <Link 
+              href="/admin"
+              className="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2"
+            >
+              <ShieldCheck size={16} className="text-blue-400" /> <span className="hidden sm:inline">Admin</span>
+            </Link>
             <Link 
               href="/rules"
               className="bg-blue-600/10 border border-blue-500/20 hover:bg-blue-600/20 text-blue-400 px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2"

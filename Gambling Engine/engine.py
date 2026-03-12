@@ -155,6 +155,22 @@ def log_inning_data(game_id, inning_number, half, runs, runners, game_info=None)
         if conn:
             conn.close()
 
+def get_setting(key, default=None):
+    """Fetches a system setting from the database."""
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT setting_value FROM system_settings WHERE setting_key = %s", (key,))
+        res = cur.fetchone()
+        cur.close()
+        return res[0] if res else default
+    except Exception as e:
+        print(f"Error fetching setting {key}: {e}")
+        return default
+    finally:
+        if conn: conn.close()
+
 def get_active_games():
     """Fetches currently live MLB games."""
     today = datetime.now().strftime('%Y-%m-%d')
@@ -298,7 +314,9 @@ def monitor_games(alerter, redis_client, ai_agent=None):
 if __name__ == "__main__":
     print("MLB Engine Active. Scanning for opportunities...", flush=True)
     update_team_data()
-    webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
+    
+    # Priority: Database Setting -> Environment Variable
+    webhook_url = get_setting("discord_webhook_url") or os.getenv("DISCORD_WEBHOOK_URL")
     alerter = DiscordWebhookAlert(webhook_url) if webhook_url else None
     
     redis_client = get_redis_client()
