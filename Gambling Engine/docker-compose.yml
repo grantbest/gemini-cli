@@ -55,6 +55,7 @@ services:
       APP_ENV: ${APP_ENV:-development}
       DEV_URL: ${DEV_URL:-http://localhost:3000}
       PROD_URL: ${PROD_URL:-http://localhost:3001}
+      DISCORD_CHANNEL_URL: ${DISCORD_CHANNEL_URL:-https://discord.com/channels/your-channel-id}
     ports:
       - "3000:3000"
     depends_on:

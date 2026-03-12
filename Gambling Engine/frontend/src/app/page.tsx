@@ -9,7 +9,8 @@ import {
   Clock,
   Database,
   ShieldAlert,
-  Settings
+  Settings,
+  ExternalLink
 } from 'lucide-react';
 import Link from 'next/link';
 import { 
@@ -52,6 +53,7 @@ interface AppConfig {
   appEnv: string;
   devUrl: string;
   prodUrl: string;
+  discordChannelUrl: string;
 }
 
 export default function Dashboard() {
@@ -166,13 +168,23 @@ export default function Dashboard() {
             >
               <Settings size={16} /> Rules Engine
             </Link>
-            <button 
-              onClick={sendTestAlert}
-              disabled={testLoading}
-              className="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 px-4 py-2 rounded-lg text-sm transition-all disabled:opacity-50"
-            >
-              {testLoading ? 'Sending...' : 'Test Discord Alert'}
-            </button>
+            <div className="flex flex-col gap-1">
+              <button 
+                onClick={sendTestAlert}
+                disabled={testLoading}
+                className="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 px-4 py-2 rounded-lg text-sm transition-all disabled:opacity-50"
+              >
+                {testLoading ? 'Sending...' : 'Test Discord Alert'}
+              </button>
+              <a 
+                href={config.discordChannelUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] text-slate-500 hover:text-indigo-400 transition-colors flex items-center justify-center gap-1"
+              >
+                <ExternalLink size={10} /> View Discord Channel
+              </a>
+            </div>
             <div className="flex items-center gap-2 bg-slate-900 px-4 py-2 rounded-full border border-emerald-500/30">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
               <span className="text-sm font-medium text-emerald-400">Engine Online</span>
