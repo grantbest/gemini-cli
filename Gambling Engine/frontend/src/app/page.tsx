@@ -48,24 +48,33 @@ interface Team {
   bullpen_era_rank: number;
 }
 
+interface AppConfig {
+  appEnv: string;
+  devUrl: string;
+  prodUrl: string;
+}
+
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<'bets' | 'feed' | 'teams'>('bets');
   const [bets, setBets] = useState<Bet[]>([]);
   const [logs, setLogs] = useState<InningLog[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [config, setConfig] = useState<AppConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [testLoading, setTestLoading] = useState(false);
 
   const fetchData = async () => {
     try {
-      const [betsRes, logsRes, teamsRes] = await Promise.all([
+      const [betsRes, logsRes, teamsRes, configRes] = await Promise.all([
         fetch('/api/bets'),
         fetch('/api/logs'),
-        fetch('/api/teams')
+        fetch('/api/teams'),
+        fetch('/api/config')
       ]);
       setBets(await betsRes.json());
       setLogs(await logsRes.json());
       setTeams(await teamsRes.json());
+      setConfig(await configRes.json());
     } catch (err) {
       console.error('Failed to fetch data', err);
     } finally {
@@ -121,11 +130,11 @@ export default function Dashboard() {
     { name: 'Big Inning Momentum', wins: bets.filter(b => b.system_triggered === 'Big Inning Momentum' && b.result === 'WON').length },
   ];
 
-  const currentEnv = process.env.NEXT_PUBLIC_APP_ENV || 'development';
+  const currentEnv = config?.appEnv || 'development';
   const isProd = currentEnv === 'production';
-  const switchUrl = isProd 
-    ? (process.env.NEXT_PUBLIC_DEV_URL || 'http://localhost:3000') 
-    : (process.env.NEXT_PUBLIC_PROD_URL || 'https://prod.dosomething.inc');
+  const switchUrl = isProd ? config?.devUrl : config?.prodUrl;
+
+  if (!config) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500">Loading Configuration...</div>;
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 p-6 font-sans">
