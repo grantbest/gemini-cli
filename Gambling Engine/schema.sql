@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS inning_logs (
     runs_scored INT,
     baserunners INT,
     batters_faced_total INT,
+    game_info VARCHAR(100),
     UNIQUE (game_id, inning_number, half)
 );
 

@@ -46,6 +46,7 @@ interface InningLog {
   half: string;
   runs_scored: number;
   baserunners: number;
+  game_info?: string;
 }
 
 interface Team {
@@ -354,7 +355,8 @@ export default function Dashboard() {
                   <table className="w-full text-left">
                     <thead className="text-xs uppercase text-slate-500 bg-slate-950/50">
                       <tr>
-                        <th className="px-6 py-4">Inning</th>
+                        <th className="px-6 py-4">Game</th>
+                        <th className="px-6 py-4 text-center">Inning</th>
                         <th className="px-6 py-4">Half</th>
                         <th className="px-6 py-4 text-emerald-400">Runs</th>
                         <th className="px-6 py-4 text-blue-400">Runners</th>
@@ -362,8 +364,9 @@ export default function Dashboard() {
                     </thead>
                     <tbody className="divide-y divide-slate-800 font-mono text-sm">
                       {logs.map((log) => (
-                        <tr key={log.log_id} className="hover:bg-slate-800/30 transition-colors">
-                          <td className="px-6 py-3">{log.inning_number}</td>
+                        <tr key={log.log_id} className="hover:bg-slate-800/30 transition-colors text-[11px]">
+                          <td className="px-6 py-3 text-slate-300 font-bold whitespace-nowrap">{log.game_info || `ID: ${log.game_id}`}</td>
+                          <td className="px-6 py-3 text-center">{log.inning_number}</td>
                           <td className="px-6 py-3 uppercase">{log.half}</td>
                           <td className="px-6 py-3 text-emerald-400 font-bold">{log.runs_scored}</td>
                           <td className="px-6 py-3 text-blue-400">{log.baserunners}</td>
@@ -376,19 +379,24 @@ export default function Dashboard() {
                 {/* Mobile Feed Cards */}
                 <div className="md:hidden divide-y divide-slate-800">
                   {logs.map((log) => (
-                    <div key={log.log_id} className="p-4 flex justify-between items-center bg-slate-950/20">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-lg font-bold">{log.inning_number}</span>
-                        <span className="text-[10px] text-slate-500 uppercase font-black">{log.half}</span>
+                    <div key={log.log_id} className="p-4 space-y-2 bg-slate-950/20">
+                      <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter border-b border-slate-800 pb-1">
+                        {log.game_info || `Game ID: ${log.game_id}`}
                       </div>
-                      <div className="flex gap-4">
-                        <div className="text-center">
-                          <p className="text-[8px] text-slate-500 uppercase">Runs</p>
-                          <p className="text-emerald-400 font-mono font-bold">{log.runs_scored}</p>
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-lg font-bold">{log.inning_number}</span>
+                          <span className="text-[10px] text-slate-500 uppercase font-black">{log.half}</span>
                         </div>
-                        <div className="text-center">
-                          <p className="text-[8px] text-slate-500 uppercase">Runners</p>
-                          <p className="text-blue-400 font-mono font-bold">{log.baserunners}</p>
+                        <div className="flex gap-4">
+                          <div className="text-center">
+                            <p className="text-[8px] text-slate-500 uppercase">Runs</p>
+                            <p className="text-emerald-400 font-mono font-bold">{log.runs_scored}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-[8px] text-slate-500 uppercase">Runners</p>
+                            <p className="text-blue-400 font-mono font-bold">{log.baserunners}</p>
+                          </div>
                         </div>
                       </div>
                     </div>

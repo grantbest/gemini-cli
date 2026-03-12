@@ -129,7 +129,7 @@ def update_team_data():
     except Exception as e:
         print(f"Error updating teams: {e}")
 
-def log_inning_data(game_id, inning_number, half, runs, runners):
+def log_inning_data(game_id, inning_number, half, runs, runners, game_info=None):
     """Logs or updates inning statistics in the database."""
     conn = None
     try:
@@ -138,11 +138,11 @@ def log_inning_data(game_id, inning_number, half, runs, runners):
         
         # Upsert: Update if exists, insert if not
         cur.execute("""
-            INSERT INTO inning_logs (game_id, inning_number, half, runs_scored, baserunners) 
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO inning_logs (game_id, inning_number, half, runs_scored, baserunners, game_info) 
+            VALUES (%s, %s, %s, %s, %s, %s)
             ON CONFLICT ON CONSTRAINT unique_inning 
-            DO UPDATE SET runs_scored = EXCLUDED.runs_scored, baserunners = EXCLUDED.baserunners
-        """, (game_id, inning_number, half, runs, runners))
+            DO UPDATE SET runs_scored = EXCLUDED.runs_scored, baserunners = EXCLUDED.baserunners, game_info = EXCLUDED.game_info
+        """, (game_id, inning_number, half, runs, runners, game_info))
         conn.commit()
         cur.close()
     except Exception as e:
@@ -250,13 +250,18 @@ def monitor_games(alerter, redis_client, ai_agent=None):
                               (1 if linescore.get('offense', {}).get('third') else 0)
             }
 
+            away_abbr = teams.get('away', {}).get('abbreviation', 'AWY')
+            home_abbr = teams.get('home', {}).get('abbreviation', 'HM')
+            game_date = datetime.now().strftime('%-m/%-d')
+            game_info = f"{home_abbr} Vs {away_abbr} - {game_date}"
+
             # Update Inning Logs
             for idx, inning in enumerate(innings):
                 inn_num = idx + 1
                 for half in ['away', 'home']:
                     data = inning.get(half, {})
                     if 'runs' in data:
-                        log_inning_data(game_id, inn_num, half, data.get('runs', 0), data.get('hits', 0) + data.get('leftOnBase', 0))
+                        log_inning_data(game_id, inn_num, half, data.get('runs', 0), data.get('hits', 0) + data.get('leftOnBase', 0), game_info)
 
             # Evaluate each dynamic rule
             for rule in rules:
