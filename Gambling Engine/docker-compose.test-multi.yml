@@ -20,10 +20,12 @@ services:
       DB_NAME: mlb_engine_dev
       DB_USER: admin
       DB_PASS: password123
+      REDIS_HOST: redis-dev
       MLB_API_BASE_URL: http://mock_api:5000/api/v1
       OLLAMA_BASE_URL: http://host.docker.internal:11434
     depends_on:
       - db-dev
+      - redis-dev
       - mock_api
 
   frontend-dev:
@@ -68,11 +70,21 @@ services:
       DB_NAME: mlb_engine_prod
       DB_USER: admin
       DB_PASS: password123
+      REDIS_HOST: redis-prod
       # No MLB_API_BASE_URL means it hits LIVE MLB API
       DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
       OLLAMA_BASE_URL: http://host.docker.internal:11434
     depends_on:
       - db-prod
+      - redis-prod
+
+  redis-dev:
+    image: redis:7-alpine
+    container_name: mlb_redis_dev
+
+  redis-prod:
+    image: redis:7-alpine
+    container_name: mlb_redis_prod
 
   frontend-prod:
     build:

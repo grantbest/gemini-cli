@@ -160,8 +160,9 @@ def get_active_games():
             return []
         
         games = schedule['dates'][0].get('games', [])
-        # Filter for live games (Status: In Progress)
-        return [g['gamePk'] for g in games if g.get('status', {}).get('abstractGameState') == 'Live']
+        # Filter for live games (Status: In Progress or Live)
+        live_states = ['Live', 'In Progress']
+        return [g['gamePk'] for g in games if g.get('status', {}).get('abstractGameState') in live_states]
     except Exception as e:
         print(f"Error fetching schedule: {e}")
         return []
@@ -210,6 +211,7 @@ def log_bet(game_id, system, odds, stake, ai_insight=None):
 def monitor_games(alerter, redis_client, ai_agent=None):
     """Main monitoring loop for dynamic rules."""
     active_game_ids = get_active_games()
+    print(f"Monitoring {len(active_game_ids)} active games: {active_game_ids}", flush=True)
     rules = get_active_rules()
     
     if not rules:
@@ -286,7 +288,7 @@ def monitor_games(alerter, redis_client, ai_agent=None):
             print(f"Error monitoring game {game_id}: {e}")
 
 if __name__ == "__main__":
-    print("MLB Engine Active. Scanning for opportunities...")
+    print("MLB Engine Active. Scanning for opportunities...", flush=True)
     update_team_data()
     webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
     alerter = DiscordWebhookAlert(webhook_url) if webhook_url else None
