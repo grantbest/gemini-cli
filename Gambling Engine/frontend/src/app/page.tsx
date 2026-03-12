@@ -10,7 +10,10 @@ import {
   Database,
   ShieldAlert,
   Settings,
-  ExternalLink
+  ExternalLink,
+  Cpu,
+  BrainCircuit,
+  MessageSquare
 } from 'lucide-react';
 import Link from 'next/link';
 import { 
@@ -31,6 +34,7 @@ interface Bet {
   odds_taken: number;
   stake: number;
   result: string;
+  ai_insight?: string;
   created_at: string;
 }
 
@@ -57,13 +61,28 @@ interface AppConfig {
 }
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState<'bets' | 'feed' | 'teams'>('bets');
+  const [activeTab, setActiveTab] = useState<'bets' | 'feed' | 'teams' | 'ai'>('bets');
   const [bets, setBets] = useState<Bet[]>([]);
   const [logs, setLogs] = useState<InningLog[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [config, setConfig] = useState<AppConfig | null>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [testLoading, setTestLoading] = useState(false);
+
+  const fetchAiAnalysis = async () => {
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/ai/optimize');
+      const data = await res.json();
+      setAiAnalysis(data.analysis);
+    } catch (err) {
+      console.error('AI Fetch failed', err);
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -205,6 +224,7 @@ export default function Dashboard() {
           <TabButton active={activeTab === 'bets'} onClick={() => setActiveTab('bets')} icon={<Trophy size={16} />} label="Bet History" />
           <TabButton active={activeTab === 'feed'} onClick={() => setActiveTab('feed')} icon={<Database size={16} />} label="Live Data Feed" />
           <TabButton active={activeTab === 'teams'} onClick={() => setActiveTab('teams')} icon={<ShieldAlert size={16} />} label="Bullpen Rankings" />
+          <TabButton active={activeTab === 'ai'} onClick={() => setActiveTab('ai')} icon={<Cpu size={16} />} label="AI Strategy Lab" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -222,22 +242,35 @@ export default function Dashboard() {
                         <th className="px-6 py-4">System</th>
                         <th className="px-6 py-4">Stake</th>
                         <th className="px-6 py-4">Status</th>
+                        <th className="px-6 py-4">AI Insight</th>
                         <th className="px-6 py-4">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800">
                       {loading ? (
-                        <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-500">Loading data...</td></tr>
+                        <tr><td colSpan={6} className="px-6 py-8 text-center text-slate-500">Loading data...</td></tr>
                       ) : bets.length === 0 ? (
-                        <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-500">No bets tracked yet.</td></tr>
+                        <tr><td colSpan={6} className="px-6 py-8 text-center text-slate-500">No bets tracked yet.</td></tr>
                       ) : (
                         bets.map((bet) => (
-                          <tr key={bet.bet_id} className="hover:bg-slate-800/30 transition-colors">
+                          <tr key={bet.bet_id} className="hover:bg-slate-800/30 transition-colors group">
                             <td className="px-6 py-4 font-mono text-blue-400">#{bet.game_id}</td>
                             <td className="px-6 py-4 text-sm font-medium">{bet.system_triggered}</td>
                             <td className="px-6 py-4 text-sm">{(bet.stake * 100).toFixed(1)}%</td>
                             <td className="px-6 py-4">
                               <StatusBadge status={bet.result} />
+                            </td>
+                            <td className="px-6 py-4">
+                              {bet.ai_insight ? (
+                                <div className="relative group/insight">
+                                  <BrainCircuit size={18} className="text-indigo-400 cursor-help" />
+                                  <div className="absolute left-0 bottom-full mb-2 w-64 p-3 bg-slate-900 border border-slate-700 rounded-lg shadow-xl opacity-0 group-hover/insight:opacity-100 transition-opacity pointer-events-none z-50 text-[10px] leading-relaxed text-slate-300 italic">
+                                    {bet.ai_insight}
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="text-slate-700">-</span>
+                              )}
                             </td>
                             <td className="px-6 py-4">
                               {bet.result === 'PENDING' && (
@@ -295,20 +328,60 @@ export default function Dashboard() {
               </div>
             )}
 
-            {activeTab === 'teams' && (
-              <div className="bg-slate-900/50 rounded-xl border border-slate-800 overflow-hidden">
-                <div className="p-6 border-b border-slate-800">
-                  <h2 className="text-xl font-semibold">Bullpen Rankings</h2>
-                  <p className="text-xs text-slate-500 mt-1">Teams ranked by Bullpen ERA (Season Stats).</p>
+            {activeTab === 'ai' && (
+              <div className="bg-slate-900/50 rounded-xl border border-slate-800 overflow-hidden flex flex-col min-h-[400px]">
+                <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-indigo-500/5">
+                  <div>
+                    <h2 className="text-xl font-semibold flex items-center gap-2">
+                      <Cpu className="text-indigo-400" size={20} /> AI Strategy Lab
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-1">Direct analysis from local Ollama LLM (llama3).</p>
+                  </div>
+                  <button 
+                    onClick={fetchAiAnalysis}
+                    disabled={aiLoading}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm transition-all disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {aiLoading ? <Activity size={16} className="animate-spin" /> : <BrainCircuit size={16} />}
+                    {aiLoading ? 'Analyzing Patterns...' : 'Run Strategy Audit'}
+                  </button>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-px bg-slate-800">
-                  {teams.map((team) => (
-                    <div key={team.team_id} className="bg-slate-950 p-4 flex flex-col items-center gap-1">
-                      <span className="text-2xl font-black text-slate-700">#{team.bullpen_era_rank}</span>
-                      <span className="text-lg font-bold text-white">{team.abbreviation}</span>
-                      <div className={`h-1 w-full rounded-full mt-2 ${team.bullpen_era_rank <= 10 ? 'bg-emerald-500' : team.bullpen_era_rank <= 20 ? 'bg-yellow-500' : 'bg-rose-500'}`} />
+                
+                <div className="p-8 flex-1">
+                  {aiLoading ? (
+                    <div className="flex flex-col items-center justify-center h-full space-y-4 py-12">
+                      <div className="relative">
+                        <Cpu size={48} className="text-indigo-500/20 animate-pulse" />
+                        <BrainCircuit size={24} className="text-indigo-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-bounce" />
+                      </div>
+                      <div className="text-center space-y-2">
+                        <p className="text-indigo-300 font-medium animate-pulse">Consulting Local LLM...</p>
+                        <p className="text-slate-500 text-xs max-w-xs">Ollama is reviewing {bets.length} historical bets against {teams.length} team profiles.</p>
+                      </div>
                     </div>
-                  ))}
+                  ) : aiAnalysis ? (
+                    <div className="prose prose-invert max-w-none">
+                      <div className="bg-slate-950/50 border border-slate-800 p-6 rounded-xl shadow-inner whitespace-pre-wrap font-sans text-sm leading-relaxed text-slate-300">
+                        {aiAnalysis}
+                      </div>
+                      <div className="mt-6 flex items-start gap-3 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-lg">
+                        <MessageSquare size={18} className="text-indigo-400 mt-0.5" />
+                        <p className="text-xs text-indigo-200/70 italic">
+                          This analysis is generated by a local LLM and should be used to support, not replace, human judgment.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full py-12 text-center space-y-4">
+                      <div className="bg-slate-900 p-4 rounded-full border border-slate-800">
+                        <Cpu size={32} className="text-slate-700" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-slate-400 font-medium">Ready for Strategy Audit</p>
+                        <p className="text-slate-600 text-xs">Run the audit to identify patterns in your betting history.</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

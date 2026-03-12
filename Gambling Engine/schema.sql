@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS bet_tracking (
     odds_taken INT,
     stake DECIMAL,
     result VARCHAR(10) DEFAULT 'PENDING',
+    ai_insight TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
