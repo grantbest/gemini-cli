@@ -10,10 +10,11 @@ CREATE TABLE IF NOT EXISTS inning_logs (
     log_id SERIAL PRIMARY KEY,
     game_id INT,
     inning_number INT,
-    half VARCHAR(6),
+    half VARCHAR(10),
     runs_scored INT,
     baserunners INT,
-    batters_faced_total INT
+    batters_faced_total INT,
+    UNIQUE (game_id, inning_number, half)
 );
 
 -- Bet Tracking Table

@@ -140,7 +140,7 @@ def log_inning_data(game_id, inning_number, half, runs, runners):
         cur.execute("""
             INSERT INTO inning_logs (game_id, inning_number, half, runs_scored, baserunners) 
             VALUES (%s, %s, %s, %s, %s)
-            ON CONFLICT (game_id, inning_number, half) 
+            ON CONFLICT ON CONSTRAINT unique_inning 
             DO UPDATE SET runs_scored = EXCLUDED.runs_scored, baserunners = EXCLUDED.baserunners
         """, (game_id, inning_number, half, runs, runners))
         conn.commit()
